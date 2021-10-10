@@ -44,8 +44,10 @@ def describe_courses(courses):
 	describe_courses = initialize_describe_df(courses.columns)
 	describe_courses_count_min_max(courses, describe_courses)
 	describe_course_percentiles(25, courses, describe_courses)
-	#print(describe_courses)
-
+	print('EXPECTED')
+	print(courses.describe().loc['25%'])
+	print('\nRESULT')
+	print(describe_courses.loc['25%'])
 
 
 def main():

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import math
+from tools import *
 
 '''
 	count	method:
@@ -63,25 +63,11 @@ def describe_courses_count_min_max(courses, describe_courses):
 
 def describe_course_percentiles(n_th, courses, describe_courses):
 	number_of_columns = len(describe_courses.columns)
-	minus, plus = {}, {}
-
 	for i in range(number_of_columns):
 		sorted_courses = courses.sort_values(by=[courses.columns[i]])
 		index = n_th * describe_courses.loc['count'][i] / 100
 		if index % 2 == 0:
 			describe_courses.loc['25%'][i] = sorted_courses.iloc[int(index)][i]
-			minus[courses.columns[i]] = sorted_courses.iloc[int(index)][i]
-			plus[courses.columns[i]] = sorted_courses.iloc[int(index)][i]
 		else:
-			# index = int(math.ceil(index))
-			# if (index > 1):
-			# describe_courses.loc['25%'][i] = (sorted_courses.iloc[int(math.ceil(index)) - 1][i] + sorted_courses.iloc[int(math.ceil(index))][i])/2
-			describe_courses.loc['25%'][i] = sorted_courses.iloc[int(math.ceil(index)) - 1][i]
-			# elif (index < describe_courses.loc['count'][i]):
-				# describe_courses.loc['25%'][i] = (sorted_courses.iloc[index + 1][i] + sorted_courses.iloc[index][i])/2
-
-			# minus[courses.columns[i]] = (sorted_courses.iloc[index - 1][i] + sorted_courses.iloc[index][i])/2
-			# plus[courses.columns[i]] = (sorted_courses.iloc[index + 1][i] + sorted_courses.iloc[index][i])/2
-
-	# print(pd.Series(minus), pd.Series(plus), '\n',courses.describe().loc['25%'])
-	print(describe_courses)
+			describe_courses.loc['25%'][i] = (sorted_courses.iloc[highest_nearest_int(index) - 1][i] + sorted_courses.iloc[highest_nearest_int(index)][i]) / 2
+		highest_nearest_int(index)
