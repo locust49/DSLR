@@ -25,10 +25,26 @@ def	get_courses_data():
 		percentiles, min and max methodes
 '''
 
+def initialize_describe_df(number_of_columns):
+	# Create a dataframe filled with 0
+	rows_index = ['count',
+				'mean',
+				'std',
+				'min',
+				'25%',
+				'50%',
+				'75%',
+				'max',
+	]
+	zeros = np.zeros((len(rows_index), len(number_of_columns)))
+	describe = pd.DataFrame(data=zeros,columns= number_of_columns, index= rows_index)
+	return describe
+
 def describe_courses(courses):
-	describe_courses = pd.DataFrame(columns= courses.columns)
+	describe_courses = initialize_describe_df(courses.columns)
 	describe_courses_count_min_max(courses, describe_courses)
-	print(describe_courses)
+	describe_course_percentiles(25, courses, describe_courses)
+	#print(describe_courses)
 
 
 
