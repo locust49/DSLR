@@ -72,12 +72,13 @@ def describe_course_std(describe_courses, courses):
 '''
 
 def describe_course_percentiles(n_th, courses, describe_courses):
-	number_of_columns = len(describe_courses.columns)
-	for i in range(number_of_columns):
-		sorted_courses = courses.sort_values(by=[courses.columns[i]])
-		index = n_th * describe_courses.loc['count'][i] / 100
-		if index % 2 == 0:
-			describe_courses.loc['25%'][i] = sorted_courses.iloc[int(index)][i]
-		else:
-			describe_courses.loc['25%'][i] = (sorted_courses.iloc[math.ceil(index) - 1][i] + sorted_courses.iloc[math.ceil(index)][i]) / 2
-		math.ceil(index)
+	for n in n_th:
+		number_of_columns = len(describe_courses.columns)
+		n_str = str(n) + '%'
+		for i in range(number_of_columns):
+			sorted_courses = courses.sort_values(by=[courses.columns[i]])
+			index = n * describe_courses.loc['count'][i] / 100
+			if index.is_integer():
+				describe_courses.loc[n_str][i] = sorted_courses.iloc[int(index)][i]
+			else:
+				describe_courses.loc[n_str][i] = (sorted_courses.iloc[math.ceil(index) - 1][i] + sorted_courses.iloc[math.ceil(index)][i]) / 2
