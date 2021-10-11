@@ -1,6 +1,5 @@
 import numpy as np
-import pandas as pd
-from tools import *
+import math
 
 '''
 	count	method:
@@ -46,14 +45,25 @@ def describe_courses_count_min_max(courses, describe_courses):
 	return (describe_courses)
 
 
-
 '''
 	std		method:
 		The `standard deviation` is the square root of the average of the squared deviations from the mean
-		i.e., `std = sqrt(mean(x))`, where `x = abs(a - a.mean())**2`.
+		i.e., `std = sqrt(mean(x))`, where `x = abs(obs - obs.mean())**2`.
 '''
 
-### Insert some code here.
+def describe_course_std(describe_courses, courses):
+	number_of_columns = len(describe_courses.columns)
+	squared_deviations_mean = [0] * number_of_columns
+	for observation in courses.iterrows():
+		for i in range(number_of_columns):
+			if not np.isnan(observation[1][i]):
+				squared_deviations_mean[i] += (math.fabs(observation[1][i] - describe_courses.loc['mean'][i]))**2
+	for i in range(number_of_columns):
+		if describe_courses.loc['count'][i] != 1:
+			describe_courses.loc['std'][i] = math.sqrt(squared_deviations_mean[i] / (describe_courses.loc['count'][i] - 1))
+		else:
+			describe_courses.loc['std'][i] = math.sqrt(squared_deviations_mean[i])
+
 
 '''
 	percentiles:
@@ -69,5 +79,5 @@ def describe_course_percentiles(n_th, courses, describe_courses):
 		if index % 2 == 0:
 			describe_courses.loc['25%'][i] = sorted_courses.iloc[int(index)][i]
 		else:
-			describe_courses.loc['25%'][i] = (sorted_courses.iloc[highest_nearest_int(index) - 1][i] + sorted_courses.iloc[highest_nearest_int(index)][i]) / 2
-		highest_nearest_int(index)
+			describe_courses.loc['25%'][i] = (sorted_courses.iloc[math.ceil(index) - 1][i] + sorted_courses.iloc[math.ceil(index)][i]) / 2
+		math.ceil(index)

@@ -1,6 +1,6 @@
-import pandas as pd
-import numpy as np
-from describe_methods import *
+import	numpy as np
+import	pandas as pd
+from	describe_methods import *
 
 '''
 	Get the data from the dataset test
@@ -44,10 +44,12 @@ def describe_courses(courses):
 	describe_courses = initialize_describe_df(courses.columns)
 	describe_courses_count_min_max(courses, describe_courses)
 	describe_course_percentiles(25, courses, describe_courses)
-	print('EXPECTED')
-	print(courses.describe().loc['25%'])
-	print('\nRESULT')
-	print(describe_courses.loc['25%'])
+	describe_course_std(describe_courses, courses)
+	# print('EXPECTED')
+	# print(courses.describe().loc['std'])
+	# print('\nRESULT')
+	# print(describe_courses.loc['std'])
+	print(describe_courses)
 
 
 def main():
