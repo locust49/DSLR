@@ -6,6 +6,7 @@ import sys
 import re
 
 merge_histogram = True
+data_source = './datasets/dataset_train.csv'
 explain = False
 colors = ['red', 'lime', 'aqua', 'brown']
 font_size = 10
@@ -46,7 +47,7 @@ def explain_process():
 
 	font_size = 0
 	plt.rcParams.update({'font.size': font_size})
-	data_ops = data_operations()
+	data_ops = data_operations(data_source=data_source)
 	index = 1
 	fig = plt.figure(figsize=(15, 8))
 	annotation = plt.annotate("Hover", (5, 5));
@@ -73,7 +74,7 @@ def explain_process():
 		plt.pause(1)
 
 def	show_result():
-	data_ops = data_operations()
+	data_ops = data_operations(data_source=data_source)
 	draw_scatter_plot(data_ops, 'Astronomy', 'Defense Against the Dark Arts', fontsize=font_size)
 	plt.gcf().legend(data_ops.houses, loc='upper right')
 	plt.show()
@@ -81,6 +82,7 @@ def	show_result():
 def manage_arguments(args):
 	global explain
 	global merge_histogram
+	global data_source
 
 	if (len(args) != 1):
 		for arg in args:
@@ -88,6 +90,8 @@ def manage_arguments(args):
 				explain = True
 			elif arg == "--no-merge":
 				merge_histogram = False
+			elif arg.startswith("--source="):
+				data_source = arg[9:]
 
 if __name__ == '__main__':
 	plt.style.use('dark_background')

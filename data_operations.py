@@ -9,7 +9,7 @@ class data_operations:
 	def init_constants(self):
 		self.labels = self.dataframe.columns.values
 		self.classes = self.labels[6:]
-		self.houses = self.dataframe[self.labels[1]].unique()
+		self.houses = ['Ravenclaw', 'Slytherin', 'Gryffindor', 'Hufflepuff']
 		self.total = len(self.dataframe)
 
 	def get_data(self):
