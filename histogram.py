@@ -6,6 +6,7 @@ import numpy as np
 import sys
 
 merge_histogram = True
+data_source = './datasets/dataset_train.csv'
 explain = False
 colors = ['red', 'lime', 'aqua', 'brown']
 
@@ -27,7 +28,7 @@ def draw_histogram(data_ops, subject, fontsize=10):
 	plt.ylabel('Frequency', fontsize=fontsize)
 
 def explain_process():
-	data_ops = data_operations()
+	data_ops = data_operations(data_source=data_source)
 	index = 1
 	plt.figure(figsize=(15, 8))
 	plt.subplots_adjust(left=0.05,
@@ -45,7 +46,7 @@ def explain_process():
 	plt.show()
 
 def	show_result():
-	data_ops = data_operations()
+	data_ops = data_operations(data_source=data_source)
 	draw_histogram(data_ops, 'Care of Magical Creatures')
 	plt.gcf().legend(data_ops.houses, loc='upper right')
 	plt.show()
@@ -53,6 +54,7 @@ def	show_result():
 def manage_arguments(args):
 	global explain
 	global merge_histogram
+	global data_source
 
 	if (len(args) != 1):
 		for arg in args:
@@ -60,6 +62,8 @@ def manage_arguments(args):
 				explain = True
 			elif arg == "--no-merge":
 				merge_histogram = False
+			elif arg.startswith("--source="):
+				data_source = arg[9:]
 
 if __name__ == '__main__':
 	plt.style.use('dark_background')

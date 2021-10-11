@@ -7,13 +7,14 @@ import sys
 
 merge_histogram = True
 explain = False
+data_source = './datasets/dataset_train.csv'
 colors = ['red', 'lime', 'aqua', 'brown']
 font_size = 0
 text_font_size = 7
 alpha=0.5
 
 def explain_process():
-	data_ops = data_operations()
+	data_ops = data_operations(data_source=data_source)
 	index = 1
 	plt.rcParams.update({'font.size': font_size})
 	plt.figure(figsize=(15, 8))
@@ -47,6 +48,7 @@ def explain_process():
 def manage_arguments(args):
 	global explain
 	global merge_histogram
+	global data_source
 
 	if (len(args) != 1):
 		for arg in args:
@@ -54,6 +56,8 @@ def manage_arguments(args):
 				explain = True
 			elif arg == "--no-merge":
 				merge_histogram = False
+			elif arg.startswith("--source="):
+				data_source = arg[9:]
 
 if __name__ == '__main__':
 	plt.style.use('dark_background')
