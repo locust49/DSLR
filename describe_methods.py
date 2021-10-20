@@ -77,7 +77,7 @@ def describe_course_percentiles(n_th, courses, describe_courses):
 		n_str = str(n) + '%'
 		for i in range(number_of_columns):
 			sorted_courses = courses.sort_values(by=[courses.columns[i]])
-			index = n * describe_courses.loc['count'][i] / 100
+			index = n * (describe_courses.loc['count'][i] - 1) / 100
 			if index.is_integer():
 				describe_courses.loc[n_str][i] = sorted_courses.iloc[int(index)][i]
 			else:
