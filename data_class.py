@@ -114,6 +114,9 @@ class Data:
 		'''
 		# Format the indexes (input : .25 | output : 25%)
 		indexes = Tools.ft_format_percentiles(n_th)
+		
+		if indexes == None:
+			return None
 
 		percentiles_data = pd.DataFrame(data=[[float(0)] * self.number_of_columns], index=indexes, columns=list(self.columns))
 
