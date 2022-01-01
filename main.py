@@ -12,5 +12,10 @@ newData = Data('./datasets/dataset_test.csv')
 # print('Std:\n' , newData.ft_std())
 # print('perc:\n' , newData.ft_percentiles([25, 50, 75]))
 
+my_desc = newData.ft_describe(percentiles = [.25, .50, .75])
+desc = newData.data.describe(percentiles = [.25, .50, .75])
+
 # Testing the describe method
-print('describe:\n' , newData.ft_describe(percentiles = [25, 50, 75]))
+print('my describe:\n' , my_desc)
+print('em describe:\n' , desc)
+print('accuracy:\n', desc - my_desc)
