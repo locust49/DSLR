@@ -1,85 +1,92 @@
 import	numpy	as np
 from	numpy.lib	import percentile
+from pandas.core.frame import DataFrame
 from	tools		import *
 import	pandas	as pd
 import	math
 
 class Data:
-	'''
-	Constructor of Data:
-		Get the data from the dataset file
-		Use the numerical data only
-		Store this dataframe infos such as:
-			'columns' : List of the columns' name dataframe
-			'number_of_columns' : Length of the 'columns' list
-			'summed_data'		: Dataframe of the sum of the data/column
-			'counted_data'		: Dataframe of the count of the data/column
-			'mean_data'			: Dataframe of the mean of the data/column
-	'''
-	def __init__(self, data_file):
-		print('Data Class constructor being called')
-		temporary_data = pd.read_csv(data_file, index_col=0)
-		self.data = temporary_data.select_dtypes(include=[np.number])
+	def __init__(self, dataframe: DataFrame):
+		'''
+		Constructor of Data:
+			Get the data from the dataset file
+			Use the numerical data only
+			Store this dataframe infos such as:
+				'columns' : List of the columns' name dataframe
+				'summed_data'		: Dataframe of the sum of the data/column
+				'counted_data'		: Dataframe of the count of the data/column
+				'mean_data'			: Dataframe of the mean of the data/column
+		'''
+
+		print('Data Class constructor has been called')
+
+		self.data = dataframe.select_dtypes(include=[np.number])
 		self.columns = list(self.data.columns)
-		self.number_of_columns = len(self.data.columns)
 		self.summed_data = self.ft_sum()
 		self.counted_data = self.ft_count()
 		self.mean_data = self.ft_mean()
 
 
+	@classmethod
+	def from_csv(cls, csv_filename):
+		try:
+			data = pd.read_csv(csv_filename, index_col=0)
+			return cls(data)
+		except Exception:
+			print('An error occured while trying to create a dataframe from csv.')
+
 	def ft_count(self):
 		'''
 		count	method:
-			counts the number of non-NA/null observations.
+			counts the number of non-NA/null rows.
 		'''
-		count = pd.DataFrame([[float(0)] * self.number_of_columns ], columns=list(self.columns))
+		count = { key:float(0) for key in self.columns }
 
-		for index, observation in self.data.iterrows():
+		for index, row in self.data.iterrows():
 			for column in self.columns:
-				# Calculate count
-				if observation[column] is not None :
-					if not np.isnan(observation[column]):
-							count.loc[0][column] += 1
+				if row[column] is not None :
+					if not np.isnan(row[column]):
+							count[column] += 1
 		return count
 
 	def ft_min(self):
 		'''
 		min		method:
-			returns the minimal value of the observations.
+			returns the minimal value of the rows.
 		'''
-		minimum = self.data.loc[[0]]
-		for index, observation in self.data.iterrows():
-			for i in self.columns:
-				# Calculate min
-				if observation[i] <= minimum.loc[0][i]:
-					minimum.loc[0, i] = observation[i]
+		minimum = self.data.iloc[0].to_dict()
+
+		for index, row in self.data.iterrows():
+			for column in self.columns:
+				if row[column] <= minimum[column]:
+					minimum[column] = row[column]
 		return minimum
 
 	def ft_max(self):
 		'''
 		max		method:
-			returns the maximal value of the observations.
+			returns the maximal value of the rows.
 		'''
-		maximum = self.data.loc[[0]]
-		for index, observation in self.data.iterrows():
-			for i in self.columns:
-				# Calculate max
-				if observation[i] >= maximum.loc[0][i]:
-					maximum.loc[0, i] = observation[i]
+		maximum = self.data.iloc[0].to_dict()
+
+		for index, row in self.data.iterrows():
+			for column in self.columns:
+				if row[column] >= maximum[column]:
+					maximum[column] = row[column]
 		return maximum
 
 	def ft_sum(self):
 		'''
 		sum		method:
-			returns the sum of the observations values.
+			returns the sum of the rows values.
 		'''
-		summed_data = pd.DataFrame([[float(0)] * self.number_of_columns ], columns=list(self.columns))
+		summed_data = { key:float(0) for key in self.columns }
 
-		for index, observation in self.data.iterrows():
+		for index, row in self.data.iterrows():
 			for column in self.columns:
-				if observation[column] is not None:
-					if not np.isnan(observation[column]):
-						summed_data[column] += observation[column]
+				if row[column] is not None:
+					if not np.isnan(row[column]):
+						summed_data[column] += row[column]
 					else :
 						summed_data[column] += 0
 		return summed_data
@@ -87,27 +94,24 @@ class Data:
 	def ft_mean(self):
 		'''
 		mean		method:
-			returns the mean of the observations values.
+			returns the mean of the rows values.
 			i.e:
-				The arithmetic mean is the sum of the observations divided
+				The arithmetic mean is the sum of the rows divided
 				by their count (number of elements).
 		'''
-		mean = pd.DataFrame([[float(0)] * self.number_of_columns ], columns=list(self.columns))
+		mean = { key:float(0) for key in self.columns }
 
-		for i in self.columns:
-			if self.counted_data.loc[0][i] == 0 :
-				mean[i] = np.nan
+		for column in self.columns:
+			if self.counted_data[column] == 0 :
+				mean[column] = np.nan
 			else:
-				mean[i] = float(self.summed_data[i]) / float(self.counted_data.loc[0][i])
+				mean[column] = float(self.summed_data[column]) / float(self.counted_data[column])
 		return mean
-
-
-
 
 	def	ft_percentiles(self, n_th):
 		'''
 		percentiles	method:
-			Returns the n-th percentile(s) of the observations.
+			Returns the n-th percentile(s) of the rows.
 			n_th:
 				The default is [.25, .5, .75], which returns the 25th, 50th, and 75th percentiles.
 				All should fall between 0 and 1.
@@ -118,24 +122,23 @@ class Data:
 		if indexes == None:
 			return None
 
-		percentiles_data = pd.DataFrame(data=[[float(0)] * self.number_of_columns], index=indexes, columns=list(self.columns))
+		percentiles_data = { index:{ key:float(0) for key in self.columns } for index in indexes}
 
 		for n_percentile, id_percentile in zip(n_th, indexes):
-			for id_column in range(self.number_of_columns):
+			for id_column, column in enumerate(self.columns):
 				# Sort the data by column
 				sorted_data = self.data.sort_values(by=[self.columns[id_column]])
 				# Compute the index of the percentile
-				index = n_percentile * (int(self.counted_data.loc[0][id_column]) - 1)
+				index = n_percentile * (int(self.counted_data[column]) - 1)
 
 				if index.is_integer():
-					percentiles_data.loc[id_percentile][id_column] = sorted_data.iloc[int(index)][id_column]
+					percentiles_data[id_percentile][column] = sorted_data.iloc[int(index)][column]
 				else:
-					percentiles_data.loc[id_percentile][id_column] = (
-										sorted_data.iloc[math.ceil(index) - 1][id_column]
-										+ sorted_data.iloc[math.ceil(index)][id_column]
+					percentiles_data[id_percentile][column] = (
+										sorted_data.iloc[math.ceil(index) - 1][column]
+										+ sorted_data.iloc[math.ceil(index)][column]
 										) / 2
 		return percentiles_data
-
 
 	def ft_std(self):
 		'''
@@ -145,19 +148,18 @@ class Data:
 			i.e.:
 				`std = sqrt(mean(x))`, where `x = abs(obs - obs.mean())**2`.
 		'''
-		std = pd.DataFrame([[float(0)] * self.number_of_columns ],
-							columns=list(self.columns))
+		std = { key:float(0) for key in self.columns }
 
-		squared_deviations_mean = [0] * self.number_of_columns
-		for index, observation in self.data.iterrows():
-			for id_column, column in zip(range(self.number_of_columns), self.columns):
-				if not np.isnan(observation[column]):
-					squared_deviations_mean[id_column] += (math.fabs(observation[column] - self.mean_data[column]))**2
-		for id_column, column in zip(range(self.number_of_columns), self.columns):
-			if self.counted_data.loc[0][id_column] != 1:
-				std[column] = math.sqrt(squared_deviations_mean[id_column] / (self.counted_data.loc[0][id_column] - 1))
+		squared_deviations_mean = { key:float(0) for key in self.columns }
+		for index, row in self.data.iterrows():
+			for column in self.columns:
+				if not np.isnan(row[column]):
+					squared_deviations_mean[column] += (math.fabs(row[column] - self.mean_data[column]))**2
+		for column in self.columns:
+			if self.counted_data[column] != 1:
+				std[column] = math.sqrt(squared_deviations_mean[column] / (self.counted_data[column] - 1))
 			else:
-				std[column] = math.sqrt(squared_deviations_mean[id_column])
+				std[column] = math.sqrt(squared_deviations_mean[column])
 		return std
 
 	def ft_describe(self, percentiles=None):
@@ -167,12 +169,7 @@ class Data:
 				'min', 'percentiles', and 'max' methods
 		'''
 
-		# Set default percentiles to [.25, .5, .75]
-		if percentiles == None:
-			percentiles = [.25, .5, .75]
-		indexes_percentiles = Tools.ft_format_percentiles(percentiles)
-
-		# If invalid data in percentiles (n < 0 or n > 1) return None
+		indexes_percentiles = Tools.structure_percentiles(percentiles)
 		if indexes_percentiles == None:
 			return None
 
@@ -186,12 +183,13 @@ class Data:
 		]
 		describe = pd.DataFrame(columns=self.columns, index=rows_index)
 
-		describe.loc['count'] = self.ft_count().loc[0]
-		describe.loc['mean'] = self.ft_mean().loc[0]
-		describe.loc['std'] = self.ft_std().loc[0]
-		describe.loc['min'] = self.ft_min().loc[0]
+		describe.loc['count'] = self.ft_count()
+		describe.loc['mean'] = self.ft_mean()
+		describe.loc['std'] = self.ft_std()
+		describe.loc['min'] = self.ft_min()
 		percentiles_results = self.ft_percentiles(percentiles)
 		for n_th in indexes_percentiles:
-			describe.loc[n_th] = percentiles_results.loc[n_th]
-		describe.loc['max'] = self.ft_max().loc[0]
+			describe.loc[n_th] = percentiles_results[n_th]
+		describe.loc['max'] = self.ft_max()
+		
 		return describe

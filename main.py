@@ -1,7 +1,7 @@
 from numpy import percentile
 from data_class import Data
 
-newData = Data('./datasets/dataset_test.csv')
+newData = Data.from_csv('./datasets/dataset_test.csv')
 
 
 # Testing each method
@@ -13,4 +13,10 @@ newData = Data('./datasets/dataset_test.csv')
 # print('perc:\n' , newData.ft_percentiles([25, 50, 75]))
 
 # Testing the describe method
-print('describe:\n' , newData.ft_describe(percentiles = [25, 50, 75]))
+my_desc = newData.ft_describe(percentiles = [.89, .40, .6])
+desc = newData.data.describe(percentiles = [.89, .40, .6])
+
+# Testing the describe method
+print('my describe:\n' , my_desc)
+print('em describe:\n' , desc)
+print('accuracy:\n', desc - my_desc)
