@@ -1,9 +1,6 @@
-from ast import While
-from multiprocessing.sharedctypes import Value
-from tkinter.messagebox import NO
 import numpy as np
 
-class LogisticRegression():
+class LogisticRegression:
 
 	def __init__(self, learning_rate=None, epoch=None) -> None:
 		self.learning_rate = 0.01 if learning_rate == None else learning_rate
@@ -14,28 +11,22 @@ class LogisticRegression():
 		Y_class_0 = - np.log(y_predicted_value)
 		Y_class_1 = - np.log(1 - y_predicted_value)
 
-		return ((y_value * Y_class_0) + ((1 - y_value) * Y_class_1))
+		loss_value = ((y_value * Y_class_0) + ((1 - y_value) * Y_class_1))
+		return loss_value
 
 	def cost(self, sum_loss, number_of_x) -> np.floating:
 		return sum_loss / number_of_x
 
-	def cost_weights_derivative(Y_predicted_matrix, Y_matrix, X_matrix) -> np.matrix:
+	def cost_derivative_weights(Y_predicted_matrix, Y_matrix, X_matrix) -> np.matrix:
 		number_of_data = Y_matrix.shape[0]
-
-		#### Raise exception for len = 0
-		# if number_of_data < 1 :
-		# 	raise (ValueError('Incorrect number of data', number_of_data))
-		#####################################################################
-
 		return ((1 / number_of_data) * np.dot((Y_predicted_matrix - Y_matrix), X_matrix))
 
-	def cost_bias_derivative() -> np.floating:
-		pass
+	def cost_derivative_bias(Y_predicted_matrix, Y_matrix) -> np.floating:
+		number_of_data = Y_matrix.shape[0]
+		return ((1 / number_of_data) * (Y_predicted_matrix - Y_matrix))
 
-	# def hypothesis(self, x_value, bias, weight) -> None:
-	# 	return (self.sigmoid(bias + x_value * weight))
 
-	def hypothesis_matrix(self, X_matrix, bias, weights) -> None:
+	def hypothesis(self, X_matrix, bias, weights) -> np.matrix:
 		return (self.sigmoid(bias + np.dot(X_matrix, weights)))
 
 	@staticmethod
