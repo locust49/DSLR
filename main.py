@@ -1,7 +1,3 @@
-from re import L
-from statistics import mode
-from numpy import percentile
-from sklearn.metrics import accuracy_score
 from data_class import Data
 from logistic_regression_class import LogisticRegression
 import pandas as pd
@@ -39,7 +35,7 @@ target_y = fill['Hogwarts House']
 
 print(df_norm)
 houses = ['Hufflepuff', 'Ravenclaw', 'Slytherin', 'Gryffindor']
-# w = model.onevsall(df_norm, target_y, houses)
+w = model.onevsall(df_norm, target_y, houses)
 
 
 
@@ -69,7 +65,7 @@ data_x = fill.select_dtypes(np.number)
 df_norm = data_x / data_x.max()
 
 
-# pred = model.predict(df_norm, w)
+pred = model.predict(df_norm, w)
 
 ##################################### TEST #####################################
 
@@ -81,5 +77,5 @@ df_test['pred'] = pred
 df_test['res'] = 0
 
 df_test['res'] = np.where(df_test['pred'] == df_test['Hogwarts House'] , 1, 0)
-print(df_test[df_test['res'] == 0])
-print('accuracy : ', df_test['res'].mean())
+# print(df_test[df_test['res'] == 0])
+print('accuracy : {}%'.format(df_test['res'].mean() * 100))
