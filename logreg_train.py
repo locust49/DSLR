@@ -5,7 +5,7 @@ import	sys
 from logistic_regression_class	import LogisticRegression
 
 def print_usage():
-	pass
+	exit(0)
 
 def write_to_file(dictionary, filename):
 	try:
@@ -19,7 +19,7 @@ def main():
 	if len(sys.argv) != 2 :
 		print_usage()
 	try:
-		model = LogisticRegression()
+		model = LogisticRegression(bias=False, verbose=True)
 
 		data = pd.read_csv(sys.argv[1], index_col=0)
 
@@ -36,7 +36,7 @@ def main():
 
 		# Train and get results
 		weights = model.onevsall(features_normalized, target, classes)
-		write_to_file(weights, './weights')
+		weights.to_csv('./weights.csv')
 	except :
 		print('An error somewhere occured ! Reboot maybe ?')
 		pass
