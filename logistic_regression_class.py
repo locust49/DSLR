@@ -5,11 +5,13 @@ from time import time
 
 class LogisticRegression:
 
-    def __init__(self, learning_rate=None, epoch=None, bias=None, verbose=None) -> None:
+    def __init__(self, learning_rate=None, epoch=None, bias=None, fillna=None, normalize=None, verbose=None) -> None:
         self.learning_rate = 0.01 if learning_rate == None else learning_rate
         self.epoch = 10000 if epoch == None else epoch
-        self.bias = True if bias == None else False
-        self.verbose = False if verbose == None else True
+        self.bias = True if bias == None else bias
+        self.fillna = 'mean' if fillna == None else fillna
+        self.verbose = False if verbose == None else verbose
+        self.normalize = True if normalize == None else normalize
 
     def verbose_func(func):
         def wrap_func(self, *args, **kwargs):
@@ -48,16 +50,55 @@ class LogisticRegression:
     def sigmoid(x_value) -> np.floating:
         return (1 / (1 + np.exp(-x_value)))
 
+    @staticmethod
+    def fill_nan_data(data, fill_value):
+        numerical_data = data.select_dtypes(include=[np.number])
+
+        if fill_value == 'max':
+            new_data = numerical_data.fillna(numerical_data.max())
+        elif fill_value == 'mean':
+            new_data = numerical_data.fillna(numerical_data.mean())
+        elif fill_value == 'median':
+            new_data = numerical_data.fillna(numerical_data.median())
+        elif fill_value == 'min':
+            new_data = numerical_data.fillna(numerical_data.min())
+        elif fill_value == 'std':
+            new_data = numerical_data.fillna(numerical_data.std())
+        elif fill_value == 'zero':
+            new_data = numerical_data.fillna(0.)
+        elif fill_value == 'drop':
+            new_data = numerical_data.dropna()
+        else:
+            new_data = None
+            raise Exception('Undefined fill value : {}'.format(fill_value))
+        return new_data
+
+    @staticmethod
+    def normalize_data(data):
+        numerical_data = data.select_dtypes(include=[np.number])
+        normalized_data = (numerical_data - numerical_data.mean()) / numerical_data.std()
+        return (normalized_data)
+
+    def clean(  self,
+                data : pd.DataFrame
+                ) -> pd.DataFrame:
+
+        new_data = self.fill_nan_data(data, self.fillna)
+        if self.normalize == True:
+            return self.normalize_data(new_data)
+        return new_data
+
     def train(  self,
                 X_data: pd.DataFrame,
                 Y_data: pd.DataFrame,
                 ) -> None:
 
+        X_data = self.clean(X_data)
         X_values_matrix = np.matrix(X_data.to_numpy())
         Y_values_matrix = np.matrix(Y_data.to_numpy())
         if self.bias == True:
-            x_bias  = np.ones((X_values_matrix.shape[0], 1))
-            X_values_matrix = np.concatenate((X_values_matrix, x_bias), axis=1)
+            X_bias  = np.ones((X_values_matrix.shape[0], 1))
+            X_values_matrix = np.concatenate((X_values_matrix, X_bias), axis=1)
 
         total_data, total_weights = X_values_matrix.shape
         self.weights = np.matrix([1.0 for i in range(total_weights)])
@@ -72,26 +113,31 @@ class LogisticRegression:
 
 
     @verbose_func
-    def onevsall(self, X_values_matrix, Y_values_matrix, classes):
+    def onevsall(self, X_data, Y_data, classes):
+        X_values_matrix = self.clean(X_data)
         class_weight_df_columns = X_values_matrix.columns.tolist()
         if self.bias == True:
             class_weight_df_columns.append('Bias')
 
         class_weight_df = pd.DataFrame(index=classes, columns=class_weight_df_columns)
-        class_weight_df.index.name = Y_values_matrix.name
+        class_weight_df.index.name = Y_data.name
         for index, class_name in enumerate(classes):
-            Y_select = Y_values_matrix.copy()
-            Y_select[Y_values_matrix == classes[index]] = 1
-            Y_select[Y_values_matrix != classes[index]] = 0
+            Y_select = Y_data.copy()
+            Y_select[Y_data == classes[index]] = 1
+            Y_select[Y_data != classes[index]] = 0
+            if self.fillna == 'drop' :
+                indexes = X_values_matrix.index.intersection(Y_select.index)
+                Y_select = Y_select.iloc[indexes]
             weights = self.train(X_values_matrix, Y_select)
             class_weight_df.loc[class_name] = weights
         return class_weight_df
 
     @verbose_func
-    def predict(self, X_values_matrix, weights) -> pd.DataFrame:
+    def predict(self, X_data, weights) -> pd.DataFrame:
+        X_data = self.clean(X_data)
         if self.bias == True:
-            x_bias  = np.ones((X_values_matrix.shape[0], 1))
-            X_values_matrix = np.concatenate((X_values_matrix, x_bias), axis=1)
+            X_bias  = np.ones((X_data.shape[0], 1))
+            X_values_matrix = np.concatenate((X_data, X_bias), axis=1)
 
         Y_fit = pd.DataFrame(index=range(0, X_values_matrix.shape[0]), columns=weights.index)
         Y_fit.index.name = 'Index'
