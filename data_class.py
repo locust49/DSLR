@@ -1,3 +1,4 @@
+from calendar import c
 import	numpy	as np
 from	numpy.lib	import percentile
 from	tools		import *
@@ -33,14 +34,15 @@ class Data:
         self.initial_data = dataframe
         self.numerical_data = dataframe.select_dtypes(include=[np.number])
 
-        self.columns = list(self.numerical_data.columns)
+        self.columns = list(self.numerical_data.columns) if not self.numerical_data.empty else list(self.initial_data.columns)
 
-        self.summed_data = self.ft_sum()
-        self.counted_data = self.ft_count()
-        self.mean_data = self.ft_mean()
+        if not self.numerical_data.empty :
+            self.summed_data = self.ft_sum()
+            self.counted_data = self.ft_count()
+            self.mean_data = self.ft_mean()
 
-        if normalize is True:
-            self.normalized = self.z_score_normalization()
+            if normalize is True:
+                self.normalized = self.z_score_normalization()
 
     @classmethod
     def from_csv(cls, csv_filename, normalize=False):
@@ -58,20 +60,84 @@ class Data:
         count	method:
             counts the number of non-NA/null rows.
         '''
+
+        data = self.initial_data if self.numerical_data.empty else self.numerical_data
         count = { key:float(0) for key in self.columns }
 
-        for index, row in self.numerical_data.iterrows():
+        for index, row in data.iterrows():
             for column in self.columns:
-                if row[column] is not None :
-                    if not np.isnan(row[column]):
-                            count[column] += 1
+                if type(row[column]) == str:
+                    if row[column]:
+                        count[column] += 1
+                else :
+                    if row[column] is not None :
+                        if not np.isnan(row[column]):
+                                count[column] += 1
+
         return count
+
+    def ft_unique(self):
+        '''
+        unique	method:
+            counts the number of unique rows values.
+        '''
+
+        unique = { key:float(0) for key in self.columns }
+        values = {column_name: [] for column_name in self.columns}
+
+        for index, row in self.initial_data.iterrows():
+            for column in self.columns:
+                if row[column] not in values[column]:
+                    values[column].append(row[column])
+                unique[column] = len(values[column])
+        return unique
+
+    def ft_freq(self):
+        '''
+        freq method:
+            returns the most repeated value.
+        '''
+
+        freq = { key:float(0) for key in self.columns }
+        values = {column_name: {} for column_name in self.columns}
+
+        for index, row in self.initial_data.iterrows():
+            for column in self.columns:
+                if row[column] not in values[column]:
+                    values[column].update({row[column]: 1})
+                else:
+                    values[column][row[column]] += 1
+        for column in self.columns:
+            freq[column] = sorted(values[column].items(), key=lambda item:item[1])[-1][1]
+        return freq
+
+    def ft_top(self):
+        '''
+        top	method:
+            returns the most repeated value.
+        '''
+
+        top = { key:float(0) for key in self.columns }
+        values = {column_name: {} for column_name in self.columns}
+
+        for index, row in self.initial_data.iterrows():
+            for column in self.columns:
+                if row[column] not in values[column]:
+                    values[column].update({row[column]: 0})
+                else:
+                    values[column][row[column]] += 1
+        for column in self.columns:
+            top[column] = sorted(values[column].items(), key=lambda item:item[1])[-1][0]
+        return top
+
 
     def ft_min(self):
         '''
         min		method:
             returns the minimal value of the rows.
         '''
+        if self.numerical_data.empty:
+            return None
         minimum = self.numerical_data.iloc[0].to_dict()
 
         for index, row in self.numerical_data.iterrows():
@@ -85,6 +151,8 @@ class Data:
         max		method:
             returns the maximal value of the rows.
         '''
+        if self.numerical_data.empty:
+            return None
         maximum = self.numerical_data.iloc[0].to_dict()
 
         for index, row in self.numerical_data.iterrows():
@@ -98,6 +166,8 @@ class Data:
         sum		method:
             returns the sum of the rows values.
         '''
+        if self.numerical_data.empty:
+            return None
         summed_data = { key:float(0) for key in self.columns }
 
         for index, row in self.numerical_data.iterrows():
@@ -117,6 +187,8 @@ class Data:
                 The arithmetic mean is the sum of the rows divided
                 by their count (number of elements).
         '''
+        if self.numerical_data.empty:
+            return None
         mean = { key:float(0) for key in self.columns }
 
         for column in self.columns:
@@ -134,6 +206,8 @@ class Data:
                 The default is [.25, .5, .75], which returns the 25th, 50th, and 75th percentiles.
                 All should fall between 0 and 1.
         '''
+        if self.numerical_data.empty:
+            return None
         if n_th is None :
             n_th = [.25, .5, .75]
 
@@ -170,6 +244,8 @@ class Data:
             i.e.:
                 `std = sqrt(mean(x))`, where `x = abs(obs - obs.mean())**2`.
         '''
+        if self.numerical_data.empty:
+            return None
         std = { key:float(0) for key in self.columns }
 
         squared_deviations_mean = { key:float(0) for key in self.columns }
@@ -199,22 +275,35 @@ class Data:
             return None
 
         # Initialize the result dataframe.
-        rows_index = ['count',
-                    'mean',
-                    'std',
-                    'min',
-                    *indexes_percentiles,
-                    'max',
-        ]
+        if self.numerical_data.empty:
+            rows_index = ['count',
+                    'unique',
+                    'top',
+                    'freq',
+            ]
+        else:
+            rows_index = ['count',
+                        'mean',
+                        'std',
+                        'min',
+                        *indexes_percentiles,
+                        'max',
+            ]
+
         describe = pd.DataFrame(columns=self.columns, index=rows_index)
 
         describe.loc['count'] = self.ft_count()
-        describe.loc['mean'] = self.ft_mean()
-        describe.loc['std'] = self.ft_std()
-        describe.loc['min'] = self.ft_min()
-        percentiles_results = self.ft_percentiles(percentiles)
-        for n_th in indexes_percentiles:
-            describe.loc[n_th] = percentiles_results[n_th]
-        describe.loc['max'] = self.ft_max()
+        if self.numerical_data.empty:
+            describe.loc['unique'] = self.ft_unique()
+            describe.loc['top'] = self.ft_top()
+            describe.loc['freq'] = self.ft_freq()
+        if not self.numerical_data.empty:
+            describe.loc['mean'] = self.ft_mean()
+            describe.loc['std'] = self.ft_std()
+            describe.loc['min'] = self.ft_min()
+            percentiles_results = self.ft_percentiles(percentiles)
+            for n_th in indexes_percentiles:
+                describe.loc[n_th] = percentiles_results[n_th]
+            describe.loc['max'] = self.ft_max()
 
         return describe
