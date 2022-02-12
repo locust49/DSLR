@@ -49,11 +49,8 @@ class Data:
         '''
             A 'classmethod' constructor that gets the data from a CSV file.
         '''
-        try:
-            data = pd.read_csv(csv_filename, index_col=0)
-            return cls(data, normalize)
-        except Exception:
-            print('An error occured while trying to create a dataframe from csv.')
+        data = pd.read_csv(csv_filename, index_col=0)
+        return cls(data, normalize)
 
     def ft_count(self):
         '''

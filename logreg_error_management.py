@@ -15,7 +15,7 @@ def print_usage(error_string, *args):
 		print('Error while opening the file : ', *args)
 	if error_string == 'option':
 		print('Invalid option', *args)
-	if error_string == 'train':
+	if error_string == 'train' or error_string == 'describe':
 		print('{} requires one and only one training dataset !'.format(*args))
 	if error_string == 'data':
 		print('Are you sure {} is the right data ?'.format(*args))

@@ -1,17 +1,19 @@
 import	sys
 from	tools import *
 
-from data_class import Data
-
-def print_usage():
-    exit(0)
+from    data_class import Data
+from    logreg_error_management import print_usage
 
 def main():
     if len(sys.argv) != 2 :
-        print_usage()
+       print_usage('describe', sys.argv[0])
+
+    try:
+        data = Data.from_csv(sys.argv[1])
+    except:
+        print_usage('files', sys.argv[1])
 
     # Describe method
-    data = Data.from_csv(sys.argv[1])
     data_describe = data.ft_describe()
     print(data_describe)
 
