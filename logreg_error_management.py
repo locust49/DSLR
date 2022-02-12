@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 def print_usage(error_string, *args):
 	if error_string == 'label':
