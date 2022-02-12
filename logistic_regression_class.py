@@ -137,13 +137,13 @@ class LogisticRegression:
         X_data = self.clean(X_data)
         if self.bias == True:
             X_bias  = np.ones((X_data.shape[0], 1))
-            X_values_matrix = np.concatenate((X_data, X_bias), axis=1)
+            X_data = np.concatenate((X_data, X_bias), axis=1)
 
-        Y_fit = pd.DataFrame(index=range(0, X_values_matrix.shape[0]), columns=weights.index)
+        Y_fit = pd.DataFrame(index=range(0, X_data.shape[0]), columns=weights.index)
         Y_fit.index.name = 'Index'
 
         for class_name in weights.index:
-            Y_fit[class_name] = self._hypothesis(X_values_matrix, weights.loc[class_name])
+            Y_fit[class_name] = self._hypothesis(X_data, weights.loc[class_name])
         Y_fit[weights.index.name] = Y_fit.idxmax(axis=1)
         return(Y_fit[[weights.index.name]])
 

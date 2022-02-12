@@ -2,27 +2,40 @@ import	pandas	as pd
 import	sys
 
 from logistic_regression_class	import LogisticRegression
-
-def print_usage():
-	exit(0)
+from logreg_error_management	import *
 
 def main():
-	if len(sys.argv) != 4 :
-		print_usage()
+	files = manage_arguments(sys.argv, 'predict')
 
-	model = LogisticRegression()
+	model = LogisticRegression(verbose=True, bias=False)
 
-	data = pd.read_csv(sys.argv[1], index_col=0)
-	weights = pd.read_csv(sys.argv[2], index_col=0)
-	target = pd.read_csv(sys.argv[3], index_col=0)
+	try:
+		data = pd.read_csv(files[0], index_col=0)
+		data.dropna(axis=1, how='all', inplace=True)
+		convert_str_data(data, 'Best Hand')
 
-	data.dropna(axis=1, how='all', inplace=True)
+	except:
+		print_usage('files', files[0])
 
-	result = model.predict(data, weights)
-	result.to_csv('./houses.csv')
+	try:
+		weights = pd.read_csv(files[1], index_col=0)
+	except:
+		print_usage('files', files[1])
 
-	accuracy = model.calculate_accuracy(target, result)
-	print('Accuracy = ', accuracy)
+	try :
+		result = model.predict(data, weights)
+		result.to_csv('./houses.csv')
+	except :
+		print_usage('prediction')
+
+	if files[3] == True:
+		try:
+			target = pd.read_csv(files[2], index_col=0)
+			accuracy = model.calculate_accuracy(target, result)
+			print('Accuracy = ', accuracy)
+		except:
+			print_usage('files', files[2])
+
 
 if __name__ == '__main__' :
 	main()
