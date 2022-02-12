@@ -5,7 +5,7 @@ from logistic_regression_class	import LogisticRegression
 from logreg_error_management	import *
 
 def main():
-	files = manage_arguments(sys.argv)
+	files = manage_arguments(sys.argv, 'predict')
 
 	model = LogisticRegression(verbose=True, bias=False)
 
