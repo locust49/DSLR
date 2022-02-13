@@ -77,14 +77,16 @@ def manage_arguments(args, program):
 				if arg[0:len('--dataset-test=')] == '--dataset-test=':
 					files['dataset-test'] = arg[len('--dataset-test='):]
 		else:
-			files['dataset-test'] = args[1]
-			files['dataset-weights'] = args[2]
-			try:
-				if files['accuracy'] == True:
-					files['dataset-target'] = args[3]
-			except:
-				print_usage('target-file')
-
+			if len(args) > 2:
+				files['dataset-test'] = args[1]
+				files['dataset-weights'] = args[2]
+				try:
+					if files['accuracy'] == True:
+						files['dataset-target'] = args[3]
+				except:
+					print_usage('target-file')
+			else :
+				print_usage('prediction')
 
 		if check_if_good(files):
 			return list(files.values())
