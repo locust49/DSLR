@@ -1,12 +1,10 @@
-from calendar import c
 import	numpy	as np
-from	numpy.lib	import percentile
-from	tools		import *
+from	tools	import *
 import	pandas	as pd
 import	math
 
 class Data:
-    def __init__(self, dataframe: pd.DataFrame, normalize=False):
+    def __init__(self, dataframe: pd.DataFrame):
         '''
         Constructor of Data:
             Get the data from the dataset file
@@ -20,12 +18,6 @@ class Data:
                 'counted_data'		: Dataframe of the count of the numerical_data/column.
                 'mean_data'			: Dataframe of the mean of the numerical_data/column.
 
-                'self.normalized'	: If normalize is True, contains the normalized data of the
-                                      numerical_data.
-
-        Args:
-            normalize	: Default to False. If true, call the z_score_normalization method
-                          and return a normalized version of the dataframe in self.normalized
         '''
 
         print('Data Class constructor has been called')
@@ -41,16 +33,13 @@ class Data:
             self.counted_data = self.ft_count()
             self.mean_data = self.ft_mean()
 
-            if normalize is True:
-                self.normalized = self.z_score_normalization()
-
     @classmethod
-    def from_csv(cls, csv_filename, normalize=False):
+    def from_csv(cls, csv_filename):
         '''
             A 'classmethod' constructor that gets the data from a CSV file.
         '''
         data = pd.read_csv(csv_filename, index_col=0)
-        return cls(data, normalize)
+        return cls(data)
 
     def ft_count(self):
         '''
