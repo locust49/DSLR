@@ -34,7 +34,7 @@ def explain_process():
 			if i == 0:
 				plt.gcf().text(0.99 / len(data_ops.classes) * j + 0.04, 0.98, "%15.15s" % (data_ops.classes[j]), fontsize=text_font_size, color="white", horizontalalignment="center")
 			if j == 0:
-				plt.gcf().text(0.01, 0.93 / len(data_ops.classes) * i + 0.06, "%7.7s" % (data_ops.classes[i]), fontsize=text_font_size, color="white", rotation=90, horizontalalignment="center")
+				plt.gcf().text(0.01, 0.93 / len(data_ops.classes) * i + 0.06, "%7.7s" % (data_ops.classes[-i-1]), fontsize=text_font_size, color="white", rotation=90, horizontalalignment="center")
 			if i == j:
 				draw_histogram(data_ops, subject1, fontsize=5)
 			else:
