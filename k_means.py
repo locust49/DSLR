@@ -91,7 +91,8 @@ class k_means:
     def train_init(self, data_frame, props, type_prop):
         # get initialize the k means
         self.type_prop = type_prop
-        data_frame = data_frame.dropna(subset=props)
+        #data_frame = data_frame.dropna(subset=props)
+        data_frame = data_frame.fillna(data_frame.mean())
         initial_mean_positions = data_frame.sample(n=self.k)[props]
         mean_index = 0
         for _, row in initial_mean_positions.iterrows():
@@ -237,8 +238,12 @@ if __name__ == "__main__":
     from scatter_plot import draw_scatter_plot
     from sklearn.metrics import accuracy_score
     from data_operations import *
+    import sys
 
-    input_columns = ["Astronomy", "Ancient Runes"]
+    if len(sys.argv) == 3:
+        input_columns = [sys.argv[1], sys.argv[2]]
+    else:
+        input_columns = ['Defense Against the Dark Arts', 'Herbology']
     output_column = 'Hogwarts House'
 
     dataframe = data_operations().get_data()
@@ -246,12 +251,12 @@ if __name__ == "__main__":
     dataframe = df_min_max_scaled
     classifiers = k_means_optimiser(iterations=10)
     classifiers.train(dataframe, input_columns, output_column, max_iterations=100)
-    print("The dunn index : %f" % (classifiers.best_classifier.dunn_index()))
+#   print("The dunn index : %f" % (classifiers.best_classifier.dunn_index()))
     test_data = data_operations(data_source='./datasets/dataset_test.csv').get_data()
     result = classifiers.predict(test_data, input_columns, output_column)
     result.to_csv('output.csv', index=False)
     dataframe = dataframe.dropna(subset=input_columns)
-    # print("Accuracy :", accuracy_score(dataframe[output_column], result[output_column]))
-    data_ops = data_operations(data_source='output.csv')
-    draw_scatter_plot(data_ops, *input_columns, fontsize=10)
-    plt.show()
+#    print("Accuracy :", accuracy_score(dataframe[output_column], result[output_column]))
+#    data_ops = data_operations(data_source='output.csv')
+#    draw_scatter_plot(data_ops, *input_columns, fontsize=10)
+#    plt.show()
